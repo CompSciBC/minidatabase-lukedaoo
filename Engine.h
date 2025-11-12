@@ -31,11 +31,11 @@ struct Engine {
         int insertRecord(const Record &recIn) {
             const int id = recIn.id;
             // add to heap
-            int rid = (int)heap.size();
+            int heapIndex = (int)heap.size();
             heap.push_back(recIn);
 
             // append to id index
-            idIndex.insert(id, rid);
+            idIndex.insert(id, heapIndex);
 
             // append to last name index
             string lastNameAsKey = toLower(recIn.last);
@@ -47,7 +47,7 @@ struct Engine {
                 lastIndex.insert(lastNameAsKey, vector<int>{id});
             }
 
-            return rid;
+            return heapIndex;
         }
 
         // Deletes a record logically (marks as deleted and updates indexes)
@@ -59,8 +59,8 @@ struct Engine {
             if (heapIndex < 0 || heapIndex >= (int)heap.size()) return false;
 
             // soft delete
-            if (heap[heapIndex].deleted) return false;
             Record &rec = heap[heapIndex];
+            if (rec.deleted) return false;
             rec.deleted = true;
 
             // remove from id index
@@ -69,9 +69,11 @@ struct Engine {
             string lastNameAsKey = toLower(rec.last);
             // list of heap index of all records that has same last name
             vector<int> *rids = lastIndex.find(lastNameAsKey);
-            if (!rids) return false;
+            if (!rids || rids->empty()) return false;
             rids->erase(std::remove(rids->begin(), rids->end(), heapIndex), rids->end());
-            if (rids->empty()) lastIndex.erase(lastNameAsKey);
+            if (rids->empty()) {
+                lastIndex.erase(lastNameAsKey);
+            }
 
             return true;
         }
@@ -83,9 +85,11 @@ struct Engine {
             idIndex.resetMetrics();
             const int *heapIndexPtr = idIndex.find(id);
             cmpOut = idIndex.comparisons;
+
             if (!heapIndexPtr) return nullptr;
             const int heapIndex = *heapIndexPtr;
             if (heapIndex < 0 || heapIndex >= (int)heap.size()) return nullptr;
+
             const Record &rec = heap[heapIndex];
             return rec.deleted ? nullptr : &rec;
         }
@@ -93,7 +97,22 @@ struct Engine {
         // Returns all records with ID in the range [lo, hi].
         // Also reports the number of key comparisons performed.
         vector<const Record *> rangeById(int lo, int hi, int &cmpOut) {
-            return vector<const Record *>();
+            idIndex.resetMetrics();
+            vector<const Record *> result;
+
+            // idIndex: key type is int, value type is int
+            // recordId: studentIn
+            // heapIndex: index in the heap (real id)
+            auto callback = [&](const int &recordId, const int &heapIndex) {
+                if (heapIndex < 0 || heapIndex >= (int)heap.size()) return;
+                const Record &rec = heap[heapIndex];
+                if (!rec.deleted) result.push_back(&rec);
+            };
+
+            idIndex.rangeApply(lo, hi, callback);
+            cmpOut = idIndex.comparisons;
+
+            return result;
         }
 
         // Returns all records whose last name begins with a given prefix.
