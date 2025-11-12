@@ -17,6 +17,16 @@ static inline string toLower(string s) {
     return s;
 }
 
+// Makes the "high" string for searching a range of names starting with a prefix.
+// Example: For "abc", it changes to "abd" so the search gets all "abc..." but stops
+// before "abd".
+static inline string computeHigh(const string &prefix) {
+    string high = prefix;
+    if (high.empty()) return high;
+    ++high.back();
+    return high;
+}
+
 // ================== Index Engine ==================
 // Acts like a small "database engine" that manages records and two BST indexes:
 // 1) idIndex: maps student_id → record index (unique key)
@@ -41,10 +51,10 @@ struct Engine {
             string lastNameAsKey = toLower(recIn.last);
             vector<int> *rids = lastIndex.find(lastNameAsKey);
             if (rids) {
-                rids->push_back(id);
+                rids->push_back(heapIndex);
             } else {
                 // create new list if there is no such key with last name
-                lastIndex.insert(lastNameAsKey, vector<int>{id});
+                lastIndex.insert(lastNameAsKey, vector<int>{heapIndex});
             }
 
             return heapIndex;
@@ -101,9 +111,7 @@ struct Engine {
             vector<const Record *> result;
 
             // idIndex: key type is int, value type is int
-            // recordId: studentIn
-            // heapIndex: index in the heap (real id)
-            auto callback = [&](const int &recordId, const int &heapIndex) {
+            auto callback = [&](const int &studentId, const int &heapIndex) {
                 if (heapIndex < 0 || heapIndex >= (int)heap.size()) return;
                 const Record &rec = heap[heapIndex];
                 if (!rec.deleted) result.push_back(&rec);
@@ -118,7 +126,26 @@ struct Engine {
         // Returns all records whose last name begins with a given prefix.
         // Case-insensitive using lowercase comparison.
         vector<const Record *> prefixByLast(const string &prefix, int &cmpOut) {
-            return vector<const Record *>();
+            lastIndex.resetMetrics();
+            vector<const Record *> result;
+
+            // lastIndex: key type is string, value type is vector of int
+            auto callback = [&](const string &lastNameAsKey,
+                                const vector<int> &heapIndexList) {
+                for (const int &heapIndex : heapIndexList) {
+                    if (heapIndex < 0 || heapIndex >= (int)heap.size()) continue;
+                    const Record &rec = heap[heapIndex];
+                    if (!rec.deleted) result.push_back(&rec);
+                }
+            };
+
+            string low = toLower(prefix);
+            string high = computeHigh(low);
+
+            lastIndex.rangeApply(low, high, callback);
+            cmpOut = lastIndex.comparisons;
+
+            return result;
         }
 };
 
