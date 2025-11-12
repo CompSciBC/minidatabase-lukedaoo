@@ -1,6 +1,7 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
+#include <algorithm>
 #include <iostream>
 #include <vector>
 
@@ -51,7 +52,29 @@ struct Engine {
 
         // Deletes a record logically (marks as deleted and updates indexes)
         // Returns true if deletion succeeded.
-        bool deleteById(int id) { return false; }
+        bool deleteById(int id) {
+            const int *heapIndexPtr = idIndex.find(id);
+            if (!heapIndexPtr) return false;
+            const int heapIndex = *heapIndexPtr;
+            if (heapIndex < 0 || heapIndex >= (int)heap.size()) return false;
+
+            // soft delete
+            if (heap[heapIndex].deleted) return false;
+            Record &rec = heap[heapIndex];
+            rec.deleted = true;
+
+            // remove from id index
+            if (!idIndex.erase(id)) return false;
+            // remove from last name index
+            string lastNameAsKey = toLower(rec.last);
+            // list of heap index of all records that has same last name
+            vector<int> *rids = lastIndex.find(lastNameAsKey);
+            if (!rids) return false;
+            rids->erase(std::remove(rids->begin(), rids->end(), heapIndex), rids->end());
+            if (rids->empty()) lastIndex.erase(lastNameAsKey);
+
+            return true;
+        }
 
         // Finds a record by student ID.
         // Returns a pointer to the record, or nullptr if not found.
