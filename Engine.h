@@ -57,7 +57,7 @@ struct Engine {
                 lastIndex.insert(lastNameAsKey, vector<int>{heapIndex});
             }
 
-            return heapIndex;
+            return heapIndex;  // returns RID (heap index)
         }
 
         // Deletes a record logically (marks as deleted and updates indexes)
@@ -71,7 +71,6 @@ struct Engine {
             // soft delete
             Record &rec = heap[heapIndex];
             if (rec.deleted) return false;
-            rec.deleted = true;
 
             // remove from id index
             if (!idIndex.erase(id)) return false;
@@ -85,6 +84,7 @@ struct Engine {
                 lastIndex.erase(lastNameAsKey);
             }
 
+            rec.deleted = true;
             return true;
         }
 
