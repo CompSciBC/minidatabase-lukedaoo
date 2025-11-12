@@ -68,7 +68,6 @@ struct Engine {
             const int heapIndex = *heapIndexPtr;
             if (heapIndex < 0 || heapIndex >= (int)heap.size()) return false;
 
-            // soft delete
             Record &rec = heap[heapIndex];
             if (rec.deleted) return false;
 
@@ -84,6 +83,7 @@ struct Engine {
                 lastIndex.erase(lastNameAsKey);
             }
 
+            // soft delete
             rec.deleted = true;
             return true;
         }
