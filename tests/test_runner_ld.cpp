@@ -149,21 +149,21 @@ int main() {
         ts.check_eq_int(cmp, 9, "comparisons for prefixByLast('SMI') after insert");
     }
 
-    // // --- Test: test compute high
-    // {
-    //     string low = "Smi";
-    //     string high = computeHigh(low);
-    //     ts.check(high == "Smj", "computeHigh('Smi') == 'Smj'");
-    //     ts.check(computeHigh("smz") == "sm{", "computeHigh handles 'z' increment");
-    // }
-    //
-    // // --- Test: prefixByLast (no matching records) ---
-    // {
-    //     int cmp = 0;
-    //     auto rows = eng.prefixByLast("z", cmp);  // no last names start with 'z'
-    //     ts.check(rows.empty(), "prefixByLast('z') returns no records");
-    //     // Traverses nguyen -> patel -> smith (3 nodes) => 3 comps/node = 9
-    //     ts.check_eq_int(cmp, 9, "comparisons for prefixByLast('z')");
-    // }
+    // --- Test: test compute high
+    {
+        string low = "Smi";
+        string high = computeHigh(low);
+        ts.check(high == "Smj", "computeHigh('Smi') == 'Smj'");
+        ts.check(computeHigh("smz") == "sm{", "computeHigh handles 'z' increment");
+    }
+    // --- Test: prefixByLast (no matching records) ---
+    {
+        int cmp = 0;
+        auto rows = eng.prefixByLast("z", cmp);  // no last names start with 'z'
+        ts.check(rows.empty(), "prefixByLast('z') returns no records");
+        // Traverses nguyen -> patel -> smith (3 nodes) => 3 comps/node = 9
+        ts.check_eq_int(cmp, 9, "comparisons for prefixByLast('z')");
+    }
+
     return ts.summarize();
 }
