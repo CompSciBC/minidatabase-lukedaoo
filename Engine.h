@@ -1,11 +1,12 @@
 #ifndef ENGINE_H
 #define ENGINE_H
 
-#include <iostream>   
-#include <vector>     
-#include "BST.h"      
+#include <iostream>
+#include <vector>
+
+#include "BST.h"
 #include "Record.h"
-//add header files as needed
+// add header files as needed
 
 using namespace std;
 
@@ -20,39 +21,54 @@ static inline string toLower(string s) {
 // 1) idIndex: maps student_id → record index (unique key)
 // 2) lastIndex: maps lowercase(last_name) → list of record indices (non-unique key)
 struct Engine {
-    vector<Record> heap;                  // the main data store (simulates a heap file)
-    BST<int, int> idIndex;                // index by student ID
-    BST<string, vector<int>> lastIndex;   // index by last name (can have duplicates)
+        vector<Record> heap;    // the main data store (simulates a heap file)
+        BST<int, int> idIndex;  // index by student ID
+        BST<string, vector<int>> lastIndex;  // index by last name (can have duplicates)
 
-    // Inserts a new record and updates both indexes.
-    // Returns the record ID (RID) in the heap.
-    int insertRecord(const Record &recIn) {
-        //TODO
-    }
+        // Inserts a new record and updates both indexes.
+        // Returns the record ID (RID) in the heap.
+        int insertRecord(const Record &recIn) {
+            const int id = recIn.id;
+            // add to heap
+            int rid = (int)heap.size();
+            heap.push_back(recIn);
 
-    // Deletes a record logically (marks as deleted and updates indexes)
-    // Returns true if deletion succeeded.
-    bool deleteById(int id) {
-        //TODO
-    }
+            // append to id index
+            idIndex.insert(id, rid);
 
-    // Finds a record by student ID.
-    // Returns a pointer to the record, or nullptr if not found.
-    // Outputs the number of comparisons made in the search.
-    const Record *findById(int id, int &cmpOut) {
-        //TODO    }
+            // append to last name index
+            string lastNameAsKey = toLower(recIn.last);
+            vector<int> *rids = lastIndex.find(lastNameAsKey);
+            if (rids) {
+                rids->push_back(id);
+            } else {
+                // create new list if there is no such key with last name
+                lastIndex.insert(lastNameAsKey, vector<int>{id});
+            }
 
-    // Returns all records with ID in the range [lo, hi].
-    // Also reports the number of key comparisons performed.
-    vector<const Record *> rangeById(int lo, int hi, int &cmpOut) {
-        //TODO
-    }
+            return rid;
+        }
 
-    // Returns all records whose last name begins with a given prefix.
-    // Case-insensitive using lowercase comparison.
-    vector<const Record *> prefixByLast(const string &prefix, int &cmpOut) {
-        //TODO
-    }
+        // Deletes a record logically (marks as deleted and updates indexes)
+        // Returns true if deletion succeeded.
+        bool deleteById(int id) { return false; }
+
+        // Finds a record by student ID.
+        // Returns a pointer to the record, or nullptr if not found.
+        // Outputs the number of comparisons made in the search.
+        const Record *findById(int id, int &cmpOut) { return nullptr; }
+
+        // Returns all records with ID in the range [lo, hi].
+        // Also reports the number of key comparisons performed.
+        vector<const Record *> rangeById(int lo, int hi, int &cmpOut) {
+            return vector<const Record *>();
+        }
+
+        // Returns all records whose last name begins with a given prefix.
+        // Case-insensitive using lowercase comparison.
+        vector<const Record *> prefixByLast(const string &prefix, int &cmpOut) {
+            return vector<const Record *>();
+        }
 };
 
 #endif
