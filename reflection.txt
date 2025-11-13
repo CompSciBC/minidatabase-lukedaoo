@@ -1,0 +1,16 @@
+CS300 – LD – Fall 2025
+
+* Challenges *
+- The structure and naming of variables in Engine.h are not clear to me (idIndex and lastIndex).
+If I could, I would like to rename them to something more descriptive, such as:
+idIndex to dbIndexById
+lastIndex to dbIndexByLastName
+prefixByLast to findByPrefixLastName
+
+- Regarding the prefixByLast function, I’m still unsure about the correct approach to compute the upper bound.
+In C++, it is true that "a" < "b" and "smi" < "smj". I wrote test cases to verify this behavior.
+
+* What I Learned *
+- Callback and lambda techniques in C++ are really interesting. I still need to learn more about them.
+They are much cleaner than function pointers!
+- GitHub Actions: I created a script (based on your script - just change the test file name) so it now runs my custom test cases as well.

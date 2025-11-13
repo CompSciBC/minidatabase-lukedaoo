@@ -1,0 +1,26 @@
+name: C++ Build & Test
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test-with-custom-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install g++
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y g++
+
+      # Build tests (compile ONLY the test file; don't link main.cpp to avoid duplicate mains)
+      - name: Compile tests
+        run: |
+          g++ -std=gnu++17 -Wall -Wextra tests/test_runner_ld.cpp -o tests/run_tests_ld
+
+      - name: Run tests
+        run: ./tests/run_tests_ld

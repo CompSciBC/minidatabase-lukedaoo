@@ -15,3 +15,7 @@
 .vscode/
 .DS_Store
 Thumbs.db
+
+
+main
+tests/test_runner.cpp
