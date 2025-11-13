@@ -80,13 +80,14 @@ struct Engine {
             if (!rids || rids->empty()) return false;
 
             // loop through the list and remove the heap index
-            for (auto it = rids->begin(); it != rids->end(); ++it) {
-                if (*it == heapIndex) {
-                    rids->erase(it);
-                }
-            }
-            // rids->erase(std::remove(rids->begin(), rids->end(), heapIndex),
-            // rids->end());
+            // for (auto it = rids->begin(); it != rids->end(); ++it) {
+            //     if (*it == heapIndex) {
+            //         rids->erase(it);
+            //     }
+            // }
+
+            // move all elements equal to heapIndex to the end and then erase
+            rids->erase(std::remove(rids->begin(), rids->end(), heapIndex), rids->end());
             if (rids->empty()) {
                 lastIndex.erase(lastNameAsKey);
             }
